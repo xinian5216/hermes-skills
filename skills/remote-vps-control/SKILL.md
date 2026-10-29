@@ -44,7 +44,7 @@ command manual is `references/remote-vps-control-setup.txt`.
 1. **每机一钥。** 私钥位于 `/root/.ssh/hermes_<alias>_ed25519`，不得跨 VPS 共用、覆盖或传到被控机。
 2. **聊天不传秘密。** 不要求使用者发送密码、私钥、恢复码或 Token；只允许传公钥和公钥指纹。
 3. **实时确认来源。** 每次接入/迁移都现场检测主控出口 IP，并用目标机的 `$SSH_CONNECTION` 确认实际来源；不得沿用记忆中的 IP。
-4. **固定目标身份。** 保持 `StrictHostKeyChecking yes`；`ssh-keyscan` 结果必须与厂商控制台显示的 Ed25519 Host Key 指纹带外比对。
+4. **固定目标身份。** 保持 `StrictHostKeyChecking yes`；只抓取 `ssh-keyscan -t ed25519` 这一种类型，其指纹必须与厂商控制台显示的 Ed25519 Host Key 带外比对一致后才能写入 known_hosts。核验了哪种密钥，就只信任哪种密钥。
 5. **分阶段防锁死。** 新密钥的第二条独立连接成功前，不删除旧登录方式、不移除宽 SSH 规则、不关闭引导会话。
 6. **最小权限。** 优先精确 sudo 命令或 Root 持有的包装脚本；只有明确要求完整管理时才使用 `NOPASSWD: ALL`。
 7. **验证后才完成。** 远程命令提交不等于成功；必须检查退出码、配置校验、服务状态和外部可达性。
@@ -193,7 +193,7 @@ ssh -o BatchMode=yes <alias> '<remote-command>'
 - [ ] 目标和权限范围已授权。
 - [ ] 使用实时、目标可见的主控来源 IP。
 - [ ] 每台目标使用独立密钥，私钥未外传。
-- [ ] Host Key 已带外核验并固定。
+- [ ] Host Key 已带外核验；写入 known_hosts 的只有核验过的那一行 ed25519 密钥。
 - [ ] 第二条 BatchMode 连接已成功。
 - [ ] sudo、sshd 和三层来源白名单符合预期。
 - [ ] 宽规则仅在复测和授权后移除。

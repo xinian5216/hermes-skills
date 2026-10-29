@@ -192,20 +192,30 @@ AlmaLinux/Rocky/RHEL：
 
 记录 SHA256 指纹。
 
-2. 在主控机抓取公开 Host Key：
+2. 在主控机抓取公开 Host Key（**只抓 ed25519**，与第 1 步核验的类型保持一致）：
 
-  ssh-keyscan -p 22 203.0.113.10 > /tmp/<alias>.hostkey
+  ssh-keyscan -t ed25519 -p 22 203.0.113.10 > /tmp/<alias>.hostkey
   ssh-keygen -lf /tmp/<alias>.hostkey
 
-如果不是 22 端口，替换 -p 后的端口。
+如果不是 22 端口，替换 -p 后的端口；keyscan 会自动写成 `[IP]:端口` 形式，符合 known_hosts 格式。
+
+不要省略 `-t ed25519`。不加类型限制时 keyscan 会返回 rsa/ecdsa/ed25519 等多个密钥，而第 1 步只核验了 ed25519 —— 把其余类型一并写进 known_hosts，等于信任了从未比对过的密钥。攻击者若能预置其中一个类型，后续协商到该类型时校验就会通过。
 
 3. 比较两个 SHA256 指纹，必须完全一致。
 
-4. 只有一致后才加入 known_hosts：
+4. 只有一致后，才把**核验过的那一行**加入 known_hosts：
 
   cat /tmp/<alias>.hostkey >> /root/.ssh/known_hosts
   chmod 600 /root/.ssh/known_hosts
   rm -f /tmp/<alias>.hostkey
+
+写入前确认文件里只有一行、且是 ed25519：
+
+  wc -l /tmp/<alias>.hostkey; cut -d' ' -f2 /tmp/<alias>.hostkey
+
+若出现多行，说明 keyscan 仍返回了多种类型（或被注入），不要写入。
+
+若用别名连接而非直接写 IP，known_hosts 是按 **HostName** 匹配的，不是按别名。要么保持 HostName 为 IP（推荐，行为最直白），要么在 Host 块里显式写 `HostKeyAlias <alias>` 并让 known_hosts 使用该别名作为主机字段。
 
 重要：ssh-keyscan 只能发现 Host Key，不能证明它可信。必须通过厂商控制台或另一条可信通道比较指纹。
 
