@@ -1,7 +1,7 @@
 ---
 name: hermes-config-change-checklist
-description: "Use when modifying, reviewing, or troubleshooting Hermes Agent configuration, providers, models, auxiliary routing, MCP servers, tools, skills, gateway/platform settings, cron jobs, secrets, or profiles. Standardizes pre-change discovery, safe edits, post-change verification, and restart guidance so a config change is provable rather than assumed."
-version: 0.1.0
+description: "Use when modifying, reviewing, or troubleshooting Hermes Agent configuration, providers, models, auxiliary routing, MCP servers, tools, skills, gateway/platform settings, cron jobs, secrets, or profiles. Standardizes pre-change discovery, safe edits, post-change verification, and restart guidance so a config change is provable rather than assumed. Use when a settings edit must be verified before it is called done."
+version: 0.1.1
 license: MIT-0
 platforms: [linux, macos]
 metadata:
